@@ -141,6 +141,39 @@ app.get('/getTest', async (req, res) => {
     }
 })
 
+app.post('/checkUserPassword', async (req, res) => {
+    
+    const {username, password} = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Run a SQL query to get data from the Users table
+        const result = await pool
+            .request()
+            .input('username', sql.VarChar, username)
+            .query('SELECT * from dbo.Users WHERE username = @username');
+        
+            const user = result.recordset[0];
+
+            if (!user) {
+                return res.status(401).json({ message: 'User not found' });
+            }
+
+
+            if (password === user.password) {
+                return res.status(200).json({ message: 'Login successful', user });
+            } else {
+            return res.status(401).json({ message: 'Invalid password' });
+            }
+          
+    } catch (err) {
+        console.error('SQL error', err);
+        res.status(500).send('Serv');
+    }
+})
+
 app.listen(5000, function() {
     console.log('Server is running...');
 });

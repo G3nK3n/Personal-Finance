@@ -39,10 +39,6 @@ export default function Pots_Overview() {
         fetchPotsOverview();
       }, []);
 
-    // const convertPopulationNumber = useCallback(() => {
-    //     const num = props.population;
-    //     return Intl.NumberFormat("en-US").format(num)
-    // }, [props.population])
 
     return (
         <Box>

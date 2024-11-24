@@ -5,7 +5,7 @@ import { Box, Button, FormControl, IconButton, InputAdornment, InputLabel, Link,
 import Image from "next/image";
 
 import {Public_Sans} from 'next/font/google';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import React from "react";
 
@@ -16,11 +16,48 @@ const public_sans = Public_Sans({
 
 })
 
+interface User {
+    user_id: number,
+    name: string,
+    username: string,
+    password: string
+}
+
 export default function Login() {
 
+    const [user, setUser] = useState<User>()
     const [showPassword, setShowPassword] = React.useState(false);
+    const [username, setUserName] = React.useState<string>("");
+    const [password, setPassword] = React.useState<string>("");
+
+    
+    const fetchUser = async () => {
+        try{
+            const res = await fetch('http://localhost:5000/checkUserPassword', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                //In post method, make sure the variable names matches the ones in the backend (ex: username, password)
+                body: JSON.stringify({ username, password })
+            });
+
+            if(!res.ok) {
+                console.log("Login Failed");
+                setUser(undefined)
+                return;
+            }
+            else {
+                const data = await res.json();
+                setUser(data.user);
+            }
+        } catch (error) {
+            console.error("Network Error: ", error)
+        }
+        
+    };
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)
 
     const formStyle = {
         width: '100%',
@@ -63,9 +100,11 @@ export default function Login() {
                         }}
                     >
                         <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "#201F24", display: 'inline-block'}}><b>Login</b></Typography>
+                        <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "#201F24", display: 'inline-block'}}><b>{user ? user.username : null}</b></Typography>
                         <Box sx={{marginTop: '30px'}}>
-                            <TextField sx={formStyle} required label="Email" /> <br/>
-                            {/* <TextField sx={formStyle} required id="password" type="password" label="Password" /> <br/> */}
+                            <TextField sx={formStyle} required label="Username" onChange={handleUsernameChange} /> <br/>
+                            
+                            {/* The password section */}
                             <FormControl sx={formStyle} variant="outlined">
                             <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
                             <OutlinedInput
@@ -85,9 +124,12 @@ export default function Login() {
                                 </InputAdornment>
                                 }
                                 label="Password"
+                                onChange={handlePasswordChange}
+                                
                             />
                             </FormControl>
-                            <Button sx={{background: 'black', color: 'white', width: '100%', padding: '10px 0px'}} variant="text">Login</Button>
+
+                            <Button sx={{background: 'black', color: 'white', width: '100%', padding: '10px 0px'}} variant="text" onClick={fetchUser}>Login</Button>
                         </Box>
                         <Box sx={{textAlign: 'center', mt: '30px'}}>
                             <Typography sx={{marginRight: '10px', marginTop:'5px',display: 'inline-block',fontFamily: public_sans.style.fontFamily, fontSize: '16px', marginBottom: '0px', color: '#696868'}}>Need to create an account? <Link sx={{color: 'black'}} href="#"><b>Sign up</b></Link></Typography> 
