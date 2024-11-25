@@ -5,9 +5,10 @@ import { Box, Button, FormControl, IconButton, InputAdornment, InputLabel, Link,
 import Image from "next/image";
 
 import {Public_Sans} from 'next/font/google';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -29,8 +30,16 @@ export default function Login() {
     const [showPassword, setShowPassword] = React.useState(false);
     const [username, setUserName] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
+    const [loginError, setLoginError] = React.useState<string>("")
 
-    
+    const router = useRouter();
+
+    const triggerLoginEvent = () => {
+        // Dispatch the custom event to notify listeners
+        const loginEvent = new CustomEvent("loginStatusChange", {detail: {isLoggedIn: true}});
+        window.dispatchEvent(loginEvent);
+    }
+
     const fetchUser = async () => {
         try{
             const res = await fetch('http://localhost:5000/checkUserPassword', {
@@ -43,11 +52,16 @@ export default function Login() {
             if(!res.ok) {
                 console.log("Login Failed");
                 setUser(undefined)
+                setLoginError("Username or Password is incorrect!")
                 return;
             }
             else {
                 const data = await res.json();
+                localStorage.setItem("isLoggedIn", "true");
                 setUser(data.user);
+                setLoginError("");
+                triggerLoginEvent();
+                router.push("/Overview");
             }
         } catch (error) {
             console.error("Network Error: ", error)
@@ -64,6 +78,16 @@ export default function Login() {
         marginBottom: '30px'
     };
 
+    useEffect(() => {
+        
+        //THIS MAKE SURES THAT THE PERSON THAT IS ALREADY LOGGED ON,
+        //AND TRIES TO GO TO LOGIN, WILL BE REDIRECTED BACK TO OVERVIEW
+        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+        if(isLoggedIn) {
+            router.push("/Overview")
+        }
+    }, [])
 
     return (
         <Box sx={{position: 'relative', width: 'fit-content', display: 'inline-block'}}>
@@ -100,7 +124,10 @@ export default function Login() {
                         }}
                     >
                         <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "#201F24", display: 'inline-block'}}><b>Login</b></Typography>
-                        <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "#201F24", display: 'inline-block'}}><b>{user ? user.username : null}</b></Typography>
+                        {/* <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "#201F24", display: 'inline-block'}}><b>{user ? user.username : null}</b></Typography> */}
+                        <Box sx={{textAlign: 'center'}}>
+                            <Typography sx={{marginRight: '10px',display: 'block',fontFamily: public_sans.style.fontFamily, fontSize: '16px', marginBottom: '0px', color: 'red'}}>{loginError}</Typography> 
+                        </Box>
                         <Box sx={{marginTop: '30px'}}>
                             <TextField sx={formStyle} required label="Username" onChange={handleUsernameChange} /> <br/>
                             
@@ -128,7 +155,6 @@ export default function Login() {
                                 
                             />
                             </FormControl>
-
                             <Button sx={{background: 'black', color: 'white', width: '100%', padding: '10px 0px'}} variant="text" onClick={fetchUser}>Login</Button>
                         </Box>
                         <Box sx={{textAlign: 'center', mt: '30px'}}>

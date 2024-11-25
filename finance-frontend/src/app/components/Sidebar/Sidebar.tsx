@@ -32,6 +32,7 @@ export default function Sidebar() {
   const router = useRouter();
   const getPath = usePathname();
 
+
   const navigate = (path: string) => {
     router.push(path)
   }
@@ -53,6 +54,19 @@ export default function Sidebar() {
     else if(index===4) {
       return <Image style={{filter: (getPath === '/' + text) ? 'invert(40%) sepia(11%) saturate(2106%) hue-rotate(128deg) brightness(100%) contrast(94%)' : 'none'}} alt='logo' src={'/images/icon-recurring-bills.svg'} width={24} height={24}/>
     }
+  }
+
+  const logoutButton = () => {
+    localStorage.setItem("isLoggedIn", "false");
+
+    // Dispatch the custom event to notify listeners
+    const event = new CustomEvent("loginStatusChange", {
+      detail: { isLoggedIn: false },
+    });
+    window.dispatchEvent(event);
+
+
+    router.push('/Login')
   }
 
   return (
@@ -99,6 +113,9 @@ export default function Sidebar() {
             </ListItem>
           ))}
         </List>
+        <Box sx={{cursor: 'pointer'}} onClick={logoutButton}>
+          <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '16px', color: "#B3B3B3", textAlign: 'center', mt: '50px'}}><b>Logout</b></Typography>
+        </Box>
       </Drawer>
         {/* <Typography variant='h5'>HELLO</Typography> */}
       
