@@ -9,6 +9,7 @@ import {AppRouterCacheProvider} from '@mui/material-nextjs/v14-appRouter'
 import { Box } from "@mui/material";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { UserProvider } from "./components/Context/userContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -66,12 +67,14 @@ export default function RootLayout({
       <head>
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
           <Box sx={{display: 'flex',backgroundColor: '#F8F4F0', height: '100%'}}>
-            <AppRouterCacheProvider>
-              {isLoggedIn && <Sidebar />}
-              <main style={{flexGrow: 1}}>
-                {children}
-              </main>
-            </AppRouterCacheProvider>
+            <UserProvider>
+              <AppRouterCacheProvider>
+                {isLoggedIn && <Sidebar />}
+                <main style={{flexGrow: 1}}>
+                  {children}
+                </main>
+              </AppRouterCacheProvider>
+            </UserProvider>
           </Box>
         </body>
       </head>

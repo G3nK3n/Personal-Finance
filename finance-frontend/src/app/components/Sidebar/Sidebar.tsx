@@ -94,7 +94,7 @@ export default function Sidebar() {
         </Box>
         <Divider />
         <List sx={{marginTop:'20px'}}>
-          {['Overview', 'Transaction', 'Budgets','Pots','Recurring Bills'].map((text, index) => (
+          {['Overview', 'Transaction', 'Budgets','Pots','Bills'].map((text, index) => (
             <ListItem key={text} sx={{ display: 'block', paddingLeft: '0px', marginBottom: '-10px'}}>
               <ListItemButton onClick={() => navigate(text)} 
                 sx={{paddingLeft: '30px',

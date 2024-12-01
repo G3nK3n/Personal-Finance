@@ -141,6 +141,39 @@ app.get('/getTest', async (req, res) => {
     }
 })
 
+app.post('/createAccount', async (req, res) => {
+    const {name, username, password} = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Run a SQL query to get data from the Users table
+        const result = await pool
+            .request()
+            .input('username', sql.VarChar, username)
+            .query('SELECT COUNT(*) AS count from dbo.Users WHERE username = @username');
+
+            if (result.recordset[0].count > 0) {
+                return res.status(409).json({ message: 'User already exists' });
+            }
+
+            const insertQuery = 'INSERT INTO dbo.Users (name, username, password) VALUES (@name, @username, @password)';
+
+            await pool
+                .request()
+                .input('name', sql.VarChar, name)
+                .input('username', sql.VarChar, username)
+                .input('password', sql.VarChar, password)
+                .query(insertQuery);
+            
+            res.status(201).json({ message: 'Account created successfully!'});
+    } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({error: 'Internal server error'})
+    }
+})
+
 app.post('/checkUserPassword', async (req, res) => {
     
     const {username, password} = req.body;

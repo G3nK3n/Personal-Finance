@@ -1,3 +1,5 @@
+'use client'
+
 import { Box, Container, Stack } from "@mui/material";
 
 import Balance_Overview from "./Balance_Overview/page";
@@ -7,10 +9,16 @@ import Transaction_Overview from "./Transaction_Overview/page";
 import Budget_Overview from "./Budget_Overview/page";
 import Recurring_Bills_Overview from "./Recurring_Bills_Overview/page";
 
+import { useUser } from "../components/Context/userContext";
+
 export default function Overview() {
+
+  const {user} = useUser();
+
   return (
     <Box sx={{}}>
       <Container maxWidth="xl">
+        <h1>Welcome {user?.name}</h1>
         <Balance_Overview />
         <Box>
     
