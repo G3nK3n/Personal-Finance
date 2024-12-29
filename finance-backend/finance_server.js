@@ -6,7 +6,7 @@ var sql = require("mssql");
 
 var config = {
     user: 'Ken',
-    password: 'abcd',
+    password: '1234',
     server: 'DESKTOP-BRJAM44\\SQLEXPRESS',
     database: 'Finance_App_Database',
     

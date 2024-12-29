@@ -3,6 +3,7 @@
 import { Box, Container, Stack, Typography } from "@mui/material";
 import {Public_Sans} from 'next/font/google';
 import Image from 'next/image'
+import { useBills } from "../components/Context/billsContext";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -12,13 +13,15 @@ const public_sans = Public_Sans({
 })
 
 export default function Bills() {
+    const {totalAmount, paidBillsTotal, paidBillsCount, upcomingTotal, upcomingCount, dueTotal, dueCount} = useBills();
+
     return(
         <Box sx={{height: '100vh'}}>
             <Container maxWidth={'xl'}>
-                <Box sx={{mt: '40px'}}>
+                <Box sx={{pt: '40px'}}>
                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '34px', color: "#201F24", display: 'inline-block'}}><b>Recurring Bills</b></Typography>
                 </Box>
-                <Stack direction={'row'}>
+                <Stack sx={{mt: '30px'}} direction={'row'}>
                     <Stack direction={'column'}>
                         <Box sx={{backgroundColor: '#201F24', width: '337px', height: '190px', borderRadius: '20px'}}>
                             <Box sx={{padding: '20px', margin: '10px 0px 0px 10px'}}>
@@ -26,7 +29,7 @@ export default function Bills() {
                             </Box>
                             <Box sx={{ml: '30px'}}>
                                 <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '14px', color: "white", display: 'inline-block'}}>Total Bills</Typography>
-                                <Typography variant="h1" sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "white", mt: '10px'}}><b>${'384.98'}</b></Typography>
+                                <Typography variant="h1" sx={{fontFamily: public_sans.style.fontFamily, fontSize: '30px', color: "white", mt: '10px'}}><b>${totalAmount}</b></Typography>
                             </Box>
                         </Box>
 
@@ -36,20 +39,21 @@ export default function Bills() {
                                 {/* Display flex and justify content helps when aligning the items left and right */}
                                 <Box sx={{display: 'flex', justifyContent: 'space-between', padding: '15px 0px', borderBottom: '1px solid rgba(105, 104, 104, 0.2)'}}>
                                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>Paid Bills</Typography>
-                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "black" }}><b>4($190.00)</b></Typography>                                   
+                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "black" }}><b>{paidBillsCount}(${paidBillsTotal})</b></Typography>                                   
                                 </Box>
                                 <Box sx={{display: 'flex', justifyContent: 'space-between', padding: '15px 0px', borderBottom: '1px solid rgba(105, 104, 104, 0.2)'}}>
                                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>Total Upcoming</Typography>
-                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "black" }}><b>4($194.98)</b></Typography>                                   
+                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "black" }}><b>{upcomingCount}(${upcomingTotal})</b></Typography>                                   
                                 </Box>
                                 <Box sx={{display: 'flex', justifyContent: 'space-between', padding: '15px 0px'}}>
                                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#C94736", display: 'inline-block'}}>Due Soon</Typography>
-                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#C94736" }}><b>2($59.98)</b></Typography>                                   
+                                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#C94736" }}><b>{dueCount}(${dueTotal})</b></Typography>                                   
                                 </Box>
                             </Box>
                         </Box>
                     </Stack>
                     <Box>
+                        {/* Will be a new component */}
                         Test3
                     </Box>
                     

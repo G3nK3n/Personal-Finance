@@ -1,11 +1,10 @@
 'use client'
 
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import {Public_Sans} from 'next/font/google';
-import { useEffect, useState } from "react";
 import React from "react";
-
+import { useBills } from "../../components/Context/billsContext"
 
 const public_sans = Public_Sans({
   subsets: ['latin'],
@@ -24,55 +23,7 @@ interface Bills {
 
 export default function Recurring_Bills_Overview() {
 
-    const [billsOverview, setBillsOverview] = useState<Bills[]>([])
-    const [paidBillsTotal, setPaidBillsTotal] = useState<number>(0)
-    const [upcomingTotal, setUpcomingTotal] = useState<number>(0)
-    const [dueTotal, setDueTotal] = useState<number>(0)   
-    
-    useEffect(() => {
-        // Fetch data from the Node.js API when the component mounts
-        const fetchBillsOverview = async () => {
-          const res = await fetch('http://localhost:5000/getAllBills');
-          const data = await res.json();
-          setBillsOverview(data);
-        };
-    
-        fetchBillsOverview();
-        
-    }, []);
-
-    useEffect(() => {
-        calculateBills();
-    },[billsOverview])
-
-    const calculateBills = React.useCallback(() => {
-        
-        let totalPaidAmount: number = 0
-        let totalUpcomingAmount: number = 0
-        let totalDueAmount: number = 0
-        
-        billsOverview.map((bill, index) => {
-            if(bill.bill_status === 'Payed') {
-                totalPaidAmount = totalPaidAmount + bill.due_amount
-            }
-            else if(bill.bill_status === 'Due') {
-                totalDueAmount = totalDueAmount + bill.due_amount
-                totalUpcomingAmount = totalUpcomingAmount + bill.due_amount
-            }
-            else if(bill.bill_status === 'Pending') {
-                totalUpcomingAmount = totalUpcomingAmount + bill.due_amount
-            }
-        })
-
-        const totalPaidRounded = parseFloat(totalPaidAmount.toFixed(2))
-        const totalUpcomingRounded = parseFloat(totalUpcomingAmount.toFixed(2))
-        const totalDueRounded = parseFloat(totalDueAmount.toFixed(2))
-
-        setPaidBillsTotal(totalPaidRounded)
-        setUpcomingTotal(totalUpcomingRounded)
-        setDueTotal(totalDueRounded)
-
-    }, [billsOverview])
+    const {paidBillsTotal, upcomingTotal, dueTotal} = useBills();
 
     return(
         <Box>
