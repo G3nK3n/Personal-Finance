@@ -5,6 +5,8 @@ import {Public_Sans} from 'next/font/google';
 import Image from 'next/image'
 import { useBills } from "../components/Context/billsContext";
 
+import BillsLayout from "./BillsLayout/page";
+
 const public_sans = Public_Sans({
     subsets: ['latin'],
     weight: ['400'],
@@ -13,6 +15,7 @@ const public_sans = Public_Sans({
 })
 
 export default function Bills() {
+
     const {totalAmount, paidBillsTotal, paidBillsCount, upcomingTotal, upcomingCount, dueTotal, dueCount} = useBills();
 
     return(
@@ -52,9 +55,8 @@ export default function Bills() {
                             </Box>
                         </Box>
                     </Stack>
-                    <Box>
-                        {/* Will be a new component */}
-                        Test3
+                    <Box sx={{ml: '30px'}}>
+                        <BillsLayout />
                     </Box>
                     
                 </Stack>
