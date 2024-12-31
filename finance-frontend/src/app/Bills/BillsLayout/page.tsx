@@ -1,8 +1,13 @@
 'use client';
 
-import { Box, Container, FormControl, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Box, Container, FormControl, InputAdornment, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
 import {Public_Sans} from 'next/font/google';
 import SearchIcon from '@mui/icons-material/Search';
+import { useState } from "react";
+
+import { useBills } from "../../components/Context/billsContext";
+import Image from 'next/image'
+import React from "react";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -12,10 +17,35 @@ const public_sans = Public_Sans({
 })
 
 export default function BillsLayout() {
+
+
+    const {billsOverview} = useBills();
+    const [sortValue, setSortValue] = useState<string>('Latest')
+
+    const handleDropdownChange = (event: SelectChangeEvent) => {
+        setSortValue(event.target.value);
+    };
+
+    const checkStatus = React.useCallback((billStatus: string) => {
+        
+        let status: string | null = null
+        
+        if(billStatus === 'Due') {
+            status = '/images/icon-bill-due.svg';
+        }
+        else if(billStatus === 'Payed') {
+            status = '/images/icon-bill-paid.svg';
+        }
+        
+        return status;
+
+    }, [])
+
+
     return(
-        <Box sx={{width: '699px', background: 'white', padding: '30px', borderRadius: '15px'}}>
+        <Box sx={{width: '1000px', background: 'white', padding: '30px', borderRadius: '15px'}}>
                 <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                    <TextField sx={{width: {xs: '100%', md: '280px', xl: '320px'}, height: '45px', backgroundColor: 'background.secondary', fontFamily: 'Nunito', mt: '0px'}} label="Search for country..." id="searchCountries"
+                    <TextField sx={{width: {xs: '100%', md: '280px', xl: '320px'}, height: '45px', backgroundColor: 'background.secondary', fontFamily: 'Nunito', mt: '0px'}} label="Search Bills" id="searchCountries"
                         InputProps={{endAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>)}} 
                         margin="normal" 
                     />
@@ -25,19 +55,51 @@ export default function BillsLayout() {
                         <Select
                             labelId="demo-simple-select-standard-label"
                             id="demo-simple-select-standard"
-                            // value={region}
-                            // onChange={handleDropdownChange}
+                            value={sortValue}
+                            onChange={handleDropdownChange}
                             label="Region"
                             sx={{backgroundColor: "background.secondary", padding: '4px 0px'}} 
                         >
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Africa'}>Latest</MenuItem>
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Americas'}>Oldest</MenuItem>
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Asia'}>A to Z</MenuItem>
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Europe'}>Z to A</MenuItem>
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Oceania'}>Highest</MenuItem>
-                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Oceania'}>Lowest</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Latest'}>Latest</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Oldest'}>Oldest</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'A to Z'}>A to Z</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Z to A'}>Z to A</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Highest'}>Highest</MenuItem>
+                            <MenuItem sx={{backgroundColor: "background.secondary"}} value={'Lowest'}>Lowest</MenuItem>
                         </Select>
                     </FormControl>
+                </Box>
+
+                <Box sx={{mt: '25px', padding: '20px'}}>
+                    <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+                        <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>Bill Title</Typography>
+                        <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', ml: '148px'}}>Due Date</Typography>
+                        <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>Amount</Typography>
+                    </Box>
+
+                    {billsOverview ? 
+                        billsOverview.map((bills, index) => {
+                            const statusIcon = checkStatus(bills.bill_status)
+                            return(
+                                <Box key={index}>
+                                    <hr style={{marginTop: '20px', marginBottom: '20px', opacity: '0.2'}} className="solid" />
+                                    <Box  sx={{display: 'flex', justifyContent: 'space-between'}}>
+                                        <Box sx={{width: '319px'}}>
+                                            <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '16px', color: "black", display: 'inline-block'}}><b>{bills.bill_name}</b></Typography>
+                                        </Box>
+                                        <Box sx={{width: '120px'}}>
+                                            <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>
+                                                Monthly-{bills.due_date} {statusIcon ? <Image style={{marginLeft: '5px'}} alt='checkmark' src={statusIcon} width={12} height={12}/> : null}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{width: '100px', textAlign: 'right'}}>
+                                            <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '16px', color: "black", display: 'inline-block'}}><b>${parseFloat((bills.due_amount).toFixed(2))}</b></Typography>
+                                        </Box>
+                                    </Box>
+                                </Box>  
+                            )
+                        }) : null
+                    }
                 </Box>
         </Box>
     )
