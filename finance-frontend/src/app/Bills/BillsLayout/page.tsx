@@ -3,7 +3,7 @@
 import { Box, Container, FormControl, InputAdornment, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material";
 import {Public_Sans} from 'next/font/google';
 import SearchIcon from '@mui/icons-material/Search';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useBills } from "../../components/Context/billsContext";
 import Image from 'next/image'
@@ -16,17 +16,57 @@ const public_sans = Public_Sans({
 
 })
 
+interface Bills {
+    bill_id: number,
+    bill_name: string,
+    due_date: number,
+    due_amount: number,
+    bill_status: string,
+}
+
 export default function BillsLayout() {
 
 
     const {billsOverview} = useBills();
     const [sortValue, setSortValue] = useState<string>('Latest')
+    const [searchBill, setSearchBill] = useState<string>('')
+    const [filteredBills, setFilteredBills] = useState<Bills[]>([])
 
     const handleDropdownChange = (event: SelectChangeEvent) => {
         setSortValue(event.target.value);
     };
 
-    const checkStatus = React.useCallback((billStatus: string) => {
+    const handleSearch = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+        setSearchBill(e.target.value);
+    };
+
+
+    //This sorts by the value of the dropdown
+    useEffect(() => {
+    
+        if(sortValue === 'Latest') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => b.bill_id - a.bill_id))
+        }
+        else if(sortValue === 'Oldest') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => a.bill_id - b.bill_id))
+        }
+        else if(sortValue === 'A to Z') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => a.bill_name.localeCompare(b.bill_name)))
+        }
+        else if(sortValue === 'Z to A') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => b.bill_name.localeCompare(a.bill_name)))
+        }
+        else if(sortValue === 'Highest') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => b.due_amount - a.due_amount))
+        }
+        else if(sortValue === 'Lowest') {
+            setFilteredBills(billsOverview.filter((bills: Bills) => String(bills.bill_name).toLowerCase().includes(String(searchBill).toLowerCase())).sort((a, b) => a.due_amount - b.due_amount))
+        }
+
+    }, [sortValue, searchBill, billsOverview])
+
+    //Changes to checkmark or exclamation point depending on bill status
+    const checkStatus = (billStatus: string) => {
         
         let status: string | null = null
         
@@ -39,7 +79,22 @@ export default function BillsLayout() {
         
         return status;
 
-    }, [])
+    }
+
+    
+    //Changes the color to green or red depending on bill status
+    const checkColorStatus = (billStatus: string) => {
+        let colors: string | null = '#201F24'
+        
+        if(billStatus === 'Due') {
+            colors = '#C94736';
+        }
+        else if(billStatus === 'Payed') {
+            colors = '#277C78';
+        }
+        
+        return colors;
+    }
 
 
     return(
@@ -47,7 +102,8 @@ export default function BillsLayout() {
                 <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                     <TextField sx={{width: {xs: '100%', md: '280px', xl: '320px'}, height: '45px', backgroundColor: 'background.secondary', fontFamily: 'Nunito', mt: '0px'}} label="Search Bills" id="searchCountries"
                         InputProps={{endAdornment: (<InputAdornment position="start"><SearchIcon /></InputAdornment>)}} 
-                        margin="normal" 
+                        margin="normal"
+                        onChange={handleSearch}
                     />
                     
                     <FormControl variant="standard" sx={{ m: 1, minWidth: 200, marginTop: {xs: '40px', md: '10px', xl: '0px'}, marginBottom: '5px !important', backgroundColor: "background.secondary", color: "text.primary"}}>
@@ -77,9 +133,10 @@ export default function BillsLayout() {
                         <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>Amount</Typography>
                     </Box>
 
-                    {billsOverview ? 
-                        billsOverview.map((bills, index) => {
+                    {filteredBills ? 
+                        filteredBills.map((bills, index) => {
                             const statusIcon = checkStatus(bills.bill_status)
+                            const statusColor = checkColorStatus(bills.bill_status)
                             return(
                                 <Box key={index}>
                                     <hr style={{marginTop: '20px', marginBottom: '20px', opacity: '0.2'}} className="solid" />
@@ -88,7 +145,7 @@ export default function BillsLayout() {
                                             <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '16px', color: "black", display: 'inline-block'}}><b>{bills.bill_name}</b></Typography>
                                         </Box>
                                         <Box sx={{width: '120px'}}>
-                                            <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block'}}>
+                                            <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: statusColor, display: 'inline-block'}}>
                                                 Monthly-{bills.due_date} {statusIcon ? <Image style={{marginLeft: '5px'}} alt='checkmark' src={statusIcon} width={12} height={12}/> : null}
                                             </Typography>
                                         </Box>
