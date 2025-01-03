@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 import { UserProvider } from "./components/Context/userContext";
 import { BillsProvider } from "./components/Context/billsContext"
+import {PotsProvider} from "./components/Context/potsContext"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -71,12 +72,14 @@ export default function RootLayout({
           <Box sx={{display: 'flex',backgroundColor: '#F8F4F0', height: '100%'}}>
             <UserProvider>
               <BillsProvider>
-              <AppRouterCacheProvider>
-                {isLoggedIn && <Sidebar />}
-                <main style={{flexGrow: 1}}>
-                  {children}
-                </main>
-              </AppRouterCacheProvider>
+                <PotsProvider>
+                  <AppRouterCacheProvider>
+                    {isLoggedIn && <Sidebar />}
+                    <main style={{flexGrow: 1}}>
+                      {children}
+                    </main>
+                  </AppRouterCacheProvider>
+                </PotsProvider>
               </BillsProvider>
             </UserProvider>
           </Box>
