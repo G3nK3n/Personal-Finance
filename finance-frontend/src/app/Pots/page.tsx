@@ -9,6 +9,7 @@ import Image from 'next/image'
 import React from "react";
 
 import { usePots } from "../components/Context/potsContext";
+import AddPotsModal from '../components/Modals/addPotsModal'
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -20,13 +21,21 @@ const public_sans = Public_Sans({
 export default function BillsLayout() {
 
     const {getPots} = usePots()
+    const [showAddPotsModal, setShowAddPotsModal] = React.useState<boolean>(false);
+
+    const toggleAddPotsModal = () => {
+        setShowAddPotsModal(!showAddPotsModal)
+    }
+
+    console.log("Modal value: ", showAddPotsModal)
 
     return(
         <Box sx={{height: '100vh'}}>
+            <AddPotsModal open={showAddPotsModal} onClose={toggleAddPotsModal}/>
             <Container maxWidth={'xl'}>
                 <Box sx={{pt: '40px', display: 'flex', justifyContent: 'space-between'}}>
                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '34px', color: "#201F24", display: 'inline-block'}}><b>Pots</b></Typography>
-                    <Button sx={{width: '128px', fontSize: '14px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize', backgroundColor: '#201F24', color: 'white', padding: '15px 5px', borderRadius: '10px'}}>
+                    <Button onClick={toggleAddPotsModal} sx={{width: '128px', fontSize: '14px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize', backgroundColor: '#201F24', color: 'white', padding: '15px 5px', borderRadius: '10px'}}>
                         <b>+ Add New Pots</b>
                     </Button>
                 </Box>
@@ -57,6 +66,18 @@ export default function BillsLayout() {
                                         <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}><b>{parseFloat(((pots.total_amount/pots.target) * 100).toFixed(2))}%</b></Typography>
                                         <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}>Target of ${pots.target}</Typography>
                                     </Box>
+                                    <Grid2 sx={{mt: '25px'}} container spacing={2}>
+                                        <Grid2 size={6}>
+                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}}>
+                                                <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: '#201F24', display: 'inline-block', textTransform: 'capitalize'}}><b>+ Add Money</b></Typography>
+                                            </Button>
+                                        </Grid2>
+                                        <Grid2 size={6}>
+                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}}>
+                                                <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: '#201F24', display: 'inline-block', textTransform: 'capitalize'}}><b>Withdraw</b></Typography>
+                                            </Button>
+                                        </Grid2>
+                                    </Grid2>
                                 </Box>
                             </Grid2>
                         )
