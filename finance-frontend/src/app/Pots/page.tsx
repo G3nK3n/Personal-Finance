@@ -27,7 +27,6 @@ export default function BillsLayout() {
         setShowAddPotsModal(!showAddPotsModal)
     }
 
-    console.log("Modal value: ", showAddPotsModal)
 
     return(
         <Box sx={{height: '100vh'}}>

@@ -26,23 +26,6 @@ app.use((req, res, next) => {
 });
 
 //OVERVIEW PAGE
-app.get('/getUsernamePassword', async (req, res) => {
-
-    try {
-        // Connect to the database
-        const pool = await sql.connect(config);
-
-        // Run a SQL query to get data from the Users table
-        const result = await pool.request().query('SELECT * FROM dbo.Users');
-
-        // Send the query result back to the client
-        res.status(200).json(result.recordset);
-    } catch (err) {
-        console.error('SQL error', err);
-        res.status(500).send('Error retrieving data from database');
-    }
-})
-
 app.get('/getOverviewPots', async (req, res) => {
 
     try {
@@ -93,6 +76,8 @@ app.get('/getBudgetOverview', async (req, res) => {
     }
 })
 
+//BILLS PAGE
+
 app.get('/getAllBills', async (req, res) => {
     try {
         // Connect to the database
@@ -125,21 +110,7 @@ app.get('/getBalances', async (req, res) => {
     }
 })
 
-app.get('/getTest', async (req, res) => {
-    try {
-        // Connect to the database
-        const pool = await sql.connect(config);
-
-        // Run a SQL query to get data from the Users table
-        const result = await pool.request().query('SELECT * from dbo.Balance');
-
-        // Send the query result back to the client
-        res.status(200).json(result.recordset);
-    } catch (err) {
-        console.error('SQL error', err);
-        res.status(500).send('Error retrieving data from database');
-    }
-})
+//LOGIN PAGE
 
 app.post('/createAccount', async (req, res) => {
     const {name, username, password} = req.body;
@@ -174,6 +145,8 @@ app.post('/createAccount', async (req, res) => {
     }
 })
 
+//TRANSACTION PAGE
+
 app.post('/checkUserPassword', async (req, res) => {
     
     const {username, password} = req.body;
@@ -204,6 +177,43 @@ app.post('/checkUserPassword', async (req, res) => {
     } catch (err) {
         console.error('SQL error', err);
         res.status(500).send('Serv');
+    }
+})
+
+//POTS PAGE
+
+app.get('/getAllPots', async (req, res) => {
+
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        const result = await pool.request().query('SELECT p.pots_id, p.category_id, p.target, p.total_amount, p.color, c.category_name '
+                                                   + 'from dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id ORDER BY p.pots_id');
+
+        // Send the query result back to the client
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('SQL error', err);
+        res.status(500).send('Error retrieving data from database');
+    }
+})
+
+
+
+app.get('/getTest', async (req, res) => {
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Run a SQL query to get data from the Users table
+        const result = await pool.request().query('SELECT * from dbo.Balance');
+
+        // Send the query result back to the client
+        res.status(200).json(result.recordset);
+    } catch (err) {
+        console.error('SQL error', err);
+        res.status(500).send('Error retrieving data from database');
     }
 })
 
