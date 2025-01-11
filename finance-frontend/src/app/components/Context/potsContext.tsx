@@ -10,11 +10,22 @@ interface Pots {
     total_amount: number,
     color: string,
     category_name: string,
+    color_name: string
+}
+
+interface Colors {
+    color_id: number,
+    color: string,
+    color_name: string
 }
 
 interface PotsContextType {
     getPots: Pots[] | [];
     setGetPots: React.Dispatch<React.SetStateAction<Pots[] | []>>;
+
+
+    getListOfColors: Colors[] | [];
+    setListOfColors: React.Dispatch<React.SetStateAction<Colors[] | []>>;
 }
 
 const PotsContext = createContext<PotsContextType | undefined>(undefined);
@@ -22,6 +33,7 @@ const PotsContext = createContext<PotsContextType | undefined>(undefined);
 export const PotsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     
     const [getPots, setGetPots] = useState<Pots[]>([])
+    const [getListOfColors, setListOfColors] = useState<Colors[]>([])
 
     useEffect(() => {
         // Fetch data from the Node.js API when the component mounts
@@ -32,12 +44,20 @@ export const PotsProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     
         fetchPotsOverview();
-      }, []);
-
+        
+        const fetchListOfColors = async () => {
+          const res = await fetch('http://localhost:5000/getListOfColors');
+          const data = await res.json();
+          setListOfColors(data);
+        };
+        
+        fetchListOfColors();
+      
+      }, [setGetPots, setListOfColors]);
     
 
   return (
-    <PotsContext.Provider value={{ getPots, setGetPots }}>
+    <PotsContext.Provider value={{ getPots, setGetPots, getListOfColors, setListOfColors }}>
       {children}
     </PotsContext.Provider>
   );

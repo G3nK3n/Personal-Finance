@@ -29,7 +29,7 @@ export default function BillsLayout() {
 
 
     return(
-        <Box sx={{height: '100vh'}}>
+        <Box sx={{height: '100vh', overflowY: 'scroll'}}>
             <AddPotsModal open={showAddPotsModal} onClose={toggleAddPotsModal}/>
             <Container maxWidth={'xl'}>
                 <Box sx={{pt: '40px', display: 'flex', justifyContent: 'space-between'}}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Container, FormControl, Grid2, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, Button, Container, FormControl, Grid2, InputAdornment, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material";
 import {Public_Sans} from 'next/font/google';
 import SearchIcon from '@mui/icons-material/Search';
 import DollarSign from '@mui/icons-material/AttachMoney'
@@ -25,22 +25,44 @@ interface ModalProps {
 
 export default function addPotsModal(props: ModalProps) {
 
+    const {getPots, getListOfColors} = usePots();
+
     const [potName, setPotName] = React.useState<string>('')
     const [potNameMaxCharacters, setPotNameMaxCharacters] = React.useState<number>(30)
     const [potTarget, setPotTarget] = React.useState<number>(0)
+    const [dropDownValue, setDropDownValue] = React.useState<string>('')
 
     const handlePotNameChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setPotName(e.target.value)
+    }, [potName])
+
+    useEffect(() => {
+        const potNameMaxLength: number = 30
+        setPotNameMaxCharacters(potNameMaxLength - potName.length)
     }, [potName])
 
     const handlePotTargetChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setPotTarget(Number(e.target.value))
     }, [potTarget])
 
-    useEffect(() => {
-        const potNameMaxLength: number = 30
-        setPotNameMaxCharacters(potNameMaxLength - potName.length)
-    }, [potName])
+    const handleDropdownChange = React.useCallback((event: SelectChangeEvent) => {
+        setDropDownValue(event.target.value);
+    }, [dropDownValue]);
+
+    const checkIfColorIsTaken = React.useCallback((theColor: string) => {
+        let isColorTaken = false
+
+        if(getPots.find(pots => pots.color === theColor)) {
+            isColorTaken = true
+        }
+        else {
+            isColorTaken = false
+        }
+        return isColorTaken
+
+    }, [getListOfColors])
+
+
 
     return (
         
@@ -93,10 +115,43 @@ export default function addPotsModal(props: ModalProps) {
                         type="number"
                         onChange={handlePotTargetChange}
                     />
+                    <FormControl variant="standard" sx={{ m: 1, marginTop: '10px', marginBottom: '5px !important', backgroundColor: "background.secondary", color: "text.primary", width: '100%', overflow: 'visible'}}>
+                        <InputLabel sx={{color: "text.primary"}} id="demo-simple-select-standard-label">Color</InputLabel>  
+                        <Select
+                            labelId="demo-simple-select-standard-label"
+                            id="demo-simple-select-standard"
+                            value={dropDownValue}
+                            onChange={handleDropdownChange}
+                            label="Region"
+                            sx={{backgroundColor: "background.secondary", padding: '4px 0px'}} 
+                            MenuProps={{
+                                disableScrollLock: false,
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200, // Set a max height
+                                        overflowY: 'auto', // Ensure it scrolls when content exceeds maxHeight
+                                    },
+                                },
+                            }}
+                        >
+
+                            {getListOfColors ? 
+                                getListOfColors.map((color, index) => {
+                                    return(<MenuItem key={index} sx={{backgroundColor: "background.secondary"}} disabled={checkIfColorIsTaken(color.color)} value={color.color_name}><Box sx={{display: 'inline-block', backgroundColor: color.color, borderRadius: '50%', width: '15px', height: '15px', marginRight: '20px'}} /><Box display={'inline-block'}><p>{color.color_name}</p></Box></MenuItem>)
+                                })
+                                :
+                                <MenuItem sx={{backgroundColor: "background.secondary"}}>List is empty</MenuItem>
+                            }
+
+
+                            
+
+                        </Select>
+                    </FormControl>
                 </Box>
                 
-                <Button onClick={props.onClose}>
-                    Close
+                <Button sx={{background: 'black', color: 'white', height: '53px', mt: '20px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize'}}>
+                    <b>Add Pot</b>
                 </Button>
             </Box>
         </Box>

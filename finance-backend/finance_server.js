@@ -32,8 +32,8 @@ app.get('/getOverviewPots', async (req, res) => {
         // Connect to the database
         const pool = await sql.connect(config);
 
-        const result = await pool.request().query('SELECT TOP 4 p.pots_id, p.category_id, p.target, p.total_amount, p.color, c.category_name, SUM(p.total_amount) OVER() AS total_sum '
-                                                   + 'from dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id ORDER BY p.pots_id');
+        const result = await pool.request().query('SELECT TOP 4 p.pots_id, p.category_id, p.target, p.total_amount, col.color, c.category_name, SUM(p.total_amount) OVER() AS total_sum '
+                                                   + 'from dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id JOIN dbo.Colors col ON p.color_id = col.color_id ORDER BY p.pots_id ');
 
         // Send the query result back to the client
         res.status(200).json(result.recordset);
@@ -188,12 +188,30 @@ app.get('/getAllPots', async (req, res) => {
         // Connect to the database
         const pool = await sql.connect(config);
 
-        const result = await pool.request().query('SELECT p.pots_id, p.category_id, p.target, p.total_amount, p.color, c.category_name '
-                                                   + 'from dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id ORDER BY p.pots_id');
+        const result = await pool.request().query('SELECT p.pots_id, p.category_id, p.target, p.total_amount, col.color, c.category_name, col.color_name '
+                                                   + 'FROM dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id '
+                                                   + 'JOIN dbo.Colors col ON p.color_id = col.color_id ' 
+                                                   + 'ORDER BY p.pots_id');
 
         // Send the query result back to the client
         res.status(200).json(result.recordset);
-    } catch (err) {
+    } catch (err) { 
+        console.error('SQL error', err);
+        res.status(500).send('Error retrieving data from database');
+    }
+})
+
+app.get('/getListOfColors', async (req, res) => {
+
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        const result = await pool.request().query('SELECT color_id, color, color_name from dbo.Colors');
+
+        // Send the query result back to the client
+        res.status(200).json(result.recordset);
+    } catch (err) { 
         console.error('SQL error', err);
         res.status(500).send('Error retrieving data from database');
     }
