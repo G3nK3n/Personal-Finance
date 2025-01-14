@@ -22,10 +22,10 @@ interface Colors {
 interface PotsContextType {
     getPots: Pots[] | [];
     setGetPots: React.Dispatch<React.SetStateAction<Pots[] | []>>;
-
-
     getListOfColors: Colors[] | [];
     setListOfColors: React.Dispatch<React.SetStateAction<Colors[] | []>>;
+    fetchPotsUpdate: Function;
+
 }
 
 const PotsContext = createContext<PotsContextType | undefined>(undefined);
@@ -55,9 +55,15 @@ export const PotsProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       }, [setGetPots, setListOfColors]);
     
+    const fetchPotsUpdate = async () => {
+      const res = await fetch('http://localhost:5000/getAllPots');
+      const data = await res.json();
+      setGetPots(data);  // This updates the context with the new data
+    }
+
 
   return (
-    <PotsContext.Provider value={{ getPots, setGetPots, getListOfColors, setListOfColors }}>
+    <PotsContext.Provider value={{ getPots, setGetPots, getListOfColors, setListOfColors, fetchPotsUpdate }}>
       {children}
     </PotsContext.Provider>
   );

@@ -25,12 +25,16 @@ interface ModalProps {
 
 export default function addPotsModal(props: ModalProps) {
 
-    const {getPots, getListOfColors} = usePots();
+    const {getPots, getListOfColors, fetchPotsUpdate} = usePots();
 
     const [potName, setPotName] = React.useState<string>('')
     const [potNameMaxCharacters, setPotNameMaxCharacters] = React.useState<number>(30)
     const [potTarget, setPotTarget] = React.useState<number>(0)
     const [dropDownValue, setDropDownValue] = React.useState<string>('')
+    
+    const [potNameError, setPotNameError] = React.useState<string>('')
+    const [targetError, setTargetError] = React.useState<string>('')
+    const [EmptyColorError, setEmptyColorError] = React.useState<string>('')
 
     const handlePotNameChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setPotName(e.target.value)
@@ -62,7 +66,45 @@ export default function addPotsModal(props: ModalProps) {
 
     }, [getListOfColors])
 
+    const createPot = async () => {
+        try{
+            const res = await fetch('http://localhost:5000/AddNewPot', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                //In post method, make sure the variable names matches the ones in the backend (ex: username, password)
+                body: JSON.stringify({ category_name: potName, target: potTarget, color_name: dropDownValue })
+            });
 
+            if(!res.ok) {
+                if(res.status === 409) {
+                    setPotNameError('Category name already exists or is empty. Please enter a new category name.')
+                    setEmptyColorError('')
+                    setTargetError('')
+                }
+                else if(res.status === 400) {
+                    setEmptyColorError('Please select a color')
+                    setPotNameError('')
+                    setTargetError('')
+                }
+                else if(res.status === 411) {
+                    setTargetError('Please enter a target bigger than 1')
+                    setPotNameError('')
+                    setEmptyColorError('')
+                }
+                return;
+            }
+            else {
+                setPotNameError('')
+                setEmptyColorError('')
+                setTargetError('')
+                await fetchPotsUpdate();
+                props.onClose()
+
+            }
+        } catch (error) {
+            console.error("Network Error: ", error)
+        }
+    }
 
     return (
         
@@ -96,6 +138,7 @@ export default function addPotsModal(props: ModalProps) {
                         onChange={handlePotNameChange}
                     />
                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: potNameMaxCharacters < 0 ? 'red' : "#696868", textAlign: 'right', fontWeight: potNameMaxCharacters < 0 ? 'bold' : "none"}}>{potNameMaxCharacters} Characters</Typography>
+                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red'}}>{potNameError}</Typography>
                     <TextField 
                         slotProps={{
                             input: {
@@ -115,6 +158,7 @@ export default function addPotsModal(props: ModalProps) {
                         type="number"
                         onChange={handlePotTargetChange}
                     />
+                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red'}}>{targetError}</Typography>
                     <FormControl variant="standard" sx={{ m: 1, marginTop: '10px', marginBottom: '5px !important', backgroundColor: "background.secondary", color: "text.primary", width: '100%', overflow: 'visible'}}>
                         <InputLabel sx={{color: "text.primary"}} id="demo-simple-select-standard-label">Color</InputLabel>  
                         <Select
@@ -148,9 +192,10 @@ export default function addPotsModal(props: ModalProps) {
 
                         </Select>
                     </FormControl>
+                    
                 </Box>
-                
-                <Button sx={{background: 'black', color: 'white', height: '53px', mt: '20px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize'}}>
+                <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red', ml: '7px'}}>{EmptyColorError}</Typography>
+                <Button onClick={createPot} sx={{background: 'black', color: 'white', height: '53px', mt: '20px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize'}}>
                     <b>Add Pot</b>
                 </Button>
             </Box>

@@ -188,7 +188,7 @@ app.get('/getAllPots', async (req, res) => {
         // Connect to the database
         const pool = await sql.connect(config);
 
-        const result = await pool.request().query('SELECT p.pots_id, p.category_id, p.target, p.total_amount, col.color, c.category_name, col.color_name '
+        const result = await pool.request().query('SELECT p.pots_id, p.category_id, p.target, p.total_amount, col.color, col.color_id, c.category_name, col.color_name '
                                                    + 'FROM dbo.Pots p JOIN dbo.Category c ON p.category_id = c.category_id '
                                                    + 'JOIN dbo.Colors col ON p.color_id = col.color_id ' 
                                                    + 'ORDER BY p.pots_id');
@@ -216,6 +216,95 @@ app.get('/getListOfColors', async (req, res) => {
         res.status(500).send('Error retrieving data from database');
     }
 })
+
+app.post('/AddNewPot', async (req, res) => {
+    const { category_name, target, color_name } = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Begin transaction
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        // Check if the category exists
+        const categoryResult = await transaction
+            .request()
+            .input('category_name', sql.VarChar, category_name)
+            .query('SELECT COUNT(*) AS count FROM dbo.Category WHERE category_name = @category_name');
+
+        if (categoryResult.recordset[0].count > 0 || (category_name === null || category_name === '')) {
+            await transaction.rollback();
+            return res.status(409).json({ message: 'Category name already exists or is empty. Please enter a new category name.' });
+        }
+
+        // Validate color_name
+        if (!color_name) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Please select a color' });
+        }
+
+        // Validate target
+        if (target < 1) {
+            await transaction.rollback();
+            return res.status(411).json({ message: 'Please enter a target bigger than 1' });
+        }
+
+        // Get color_id
+        const colorResult = await transaction
+            .request()
+            .input('color_name', sql.VarChar, color_name)
+            .query('SELECT color_id FROM dbo.Colors WHERE color_name = @color_name');
+
+        if (colorResult.recordset.length === 0) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Invalid color name' });
+        }
+
+        const colorId = colorResult.recordset[0].color_id;
+
+        // Insert new category
+        await transaction
+            .request()
+            .input('category_name', sql.VarChar, category_name)
+            .query('INSERT INTO dbo.Category (category_name) VALUES (@category_name)');
+
+        // Get the new category_id
+        const categoryIdResult = await transaction
+            .request()
+            .input('category_name', sql.VarChar, category_name)
+            .query('SELECT category_id FROM dbo.Category WHERE category_name = @category_name');
+
+        const categoryId = categoryIdResult.recordset[0].category_id;
+
+        // Insert new pot
+        await transaction
+            .request()
+            .input('category_id', sql.Int, categoryId)
+            .input('target', sql.Int, target)
+            .input('color_id', sql.Int, colorId)
+            .query('INSERT INTO dbo.Pots (category_id, target, total_amount, color_id) VALUES (@category_id, @target, 0 , @color_id)');
+
+        // Commit transaction
+        await transaction.commit();
+
+        res.status(201).json({ message: 'Pot created successfully!' });
+    } catch (error) {
+        console.error('Database error:', error);
+
+        if (transaction) {
+            try {
+                await transaction.rollback();
+            } catch (rollbackError) {
+                console.error('Rollback error:', rollbackError);
+            }
+        }
+
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 
 

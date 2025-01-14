@@ -20,6 +20,7 @@ interface PotsOverview {
     target: number,
     total_amount: number,
     color: string,
+    color_id: number,
     category_name: string,
     total_sum: number
 }
