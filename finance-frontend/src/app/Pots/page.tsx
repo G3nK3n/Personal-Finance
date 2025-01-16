@@ -10,6 +10,7 @@ import React from "react";
 
 import { usePots } from "../components/Context/potsContext";
 import AddPotsModal from '../components/Modals/addPotsModal'
+import DepositModal from "../components/Modals/depositModal";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -18,14 +19,31 @@ const public_sans = Public_Sans({
 
 })
 
+interface Pots {
+    pots_id: number,
+    category_id: number,
+    target: number,
+    total_amount: number,
+    color: string,
+    category_name: string,
+    color_name: string
+}
+
 export default function BillsLayout() {
 
     const {getPots} = usePots()
     const [showAddPotsModal, setShowAddPotsModal] = React.useState<boolean>(false);
+    const [showDepositModal, setShowDepositModal] = React.useState<boolean>(false);
+    const [selectedPots, setSelectedPots] = React.useState<Pots|null>(null)
 
     const toggleAddPotsModal = () => {
         setShowAddPotsModal(!showAddPotsModal)
     }
+
+    const toggleDepositModal = (pot: Pots | null = null) => {
+        setSelectedPots(pot);
+        setShowDepositModal(!showDepositModal);
+    };
 
 
     return(
@@ -43,6 +61,7 @@ export default function BillsLayout() {
                     {getPots.map((pots, index) => {
                         return(
                             <Grid2 key={index} size={6}>
+                                <DepositModal thePot={selectedPots} open={showDepositModal} onClose={toggleDepositModal} />
                                 <Box sx={{height: '303px', background: 'white', padding: '25px'}}>
                                     <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                                         <Box>
@@ -67,7 +86,7 @@ export default function BillsLayout() {
                                     </Box>
                                     <Grid2 sx={{mt: '25px'}} container spacing={2}>
                                         <Grid2 size={6}>
-                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}}>
+                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}} onClick={() => toggleDepositModal(pots)}>
                                                 <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: '#201F24', display: 'inline-block', textTransform: 'capitalize'}}><b>+ Add Money</b></Typography>
                                             </Button>
                                         </Grid2>

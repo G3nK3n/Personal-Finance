@@ -162,10 +162,6 @@ export default function Login() {
                             sx={{
                             width: '560px',
                             backgroundColor: 'white',
-                            //display: 'flex',
-                            // alignItems: 'center',
-                            // justifyContent: 'center',
-                            // textAlign: 'center', // Ensures text is centered within this Box
                             padding: '30px',
                             borderRadius: '10px',
                             }}

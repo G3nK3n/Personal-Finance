@@ -186,10 +186,6 @@ export default function addPotsModal(props: ModalProps) {
                                 :
                                 <MenuItem sx={{backgroundColor: "background.secondary"}}>List is empty</MenuItem>
                             }
-
-
-                            
-
                         </Select>
                     </FormControl>
                     
