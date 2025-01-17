@@ -86,7 +86,7 @@ export default function BillsLayout() {
                                     </Box>
                                     <Grid2 sx={{mt: '25px'}} container spacing={2}>
                                         <Grid2 size={6}>
-                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}} onClick={() => toggleDepositModal(pots)}>
+                                            <Button disabled={Number(pots.total_amount) >= Number(pots.target)} sx={{height: '53px', width: '100%', backgroundColor: Number(pots.total_amount) >= Number(pots.target) ? '#27333d' : '#F8F4F0'}} onClick={() => toggleDepositModal(pots)}>
                                                 <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: '#201F24', display: 'inline-block', textTransform: 'capitalize'}}><b>+ Add Money</b></Typography>
                                             </Button>
                                         </Grid2>
