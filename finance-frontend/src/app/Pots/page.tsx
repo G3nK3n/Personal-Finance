@@ -11,6 +11,7 @@ import React from "react";
 import { usePots } from "../components/Context/potsContext";
 import AddPotsModal from '../components/Modals/addPotsModal'
 import DepositModal from "../components/Modals/depositModal";
+import WithdrawModal from "../components/Modals/withdrawModal";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -34,6 +35,7 @@ export default function BillsLayout() {
     const {getPots} = usePots()
     const [showAddPotsModal, setShowAddPotsModal] = React.useState<boolean>(false);
     const [showDepositModal, setShowDepositModal] = React.useState<boolean>(false);
+    const [showWithdrawModal, setShowWithdrawModal] = React.useState<boolean>(false);
     const [selectedPots, setSelectedPots] = React.useState<Pots|null>(null)
 
     const toggleAddPotsModal = () => {
@@ -43,6 +45,11 @@ export default function BillsLayout() {
     const toggleDepositModal = (pot: Pots | null = null) => {
         setSelectedPots(pot);
         setShowDepositModal(!showDepositModal);
+    };
+
+    const toggleWithdrawModal = (pot: Pots | null = null) => {
+        setSelectedPots(pot);
+        setShowWithdrawModal(!showWithdrawModal);
     };
 
 
@@ -62,6 +69,7 @@ export default function BillsLayout() {
                         return(
                             <Grid2 key={index} size={6}>
                                 <DepositModal thePot={selectedPots} open={showDepositModal} onClose={toggleDepositModal} />
+                                <WithdrawModal thePot={selectedPots} open={showWithdrawModal} onClose={toggleWithdrawModal}/>
                                 <Box sx={{height: '303px', background: 'white', padding: '25px'}}>
                                     <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                                         <Box>
@@ -91,7 +99,7 @@ export default function BillsLayout() {
                                             </Button>
                                         </Grid2>
                                         <Grid2 size={6}>
-                                            <Button sx={{height: '53px', width: '100%', backgroundColor: '#F8F4F0'}}>
+                                            <Button disabled={Number(pots.total_amount) <= 0} sx={{height: '53px', width: '100%', backgroundColor: Number(pots.total_amount) <= 0 ? '#27333d' : '#F8F4F0'}} onClick={() => toggleWithdrawModal(pots)}>
                                                 <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: '#201F24', display: 'inline-block', textTransform: 'capitalize'}}><b>Withdraw</b></Typography>
                                             </Button>
                                         </Grid2>

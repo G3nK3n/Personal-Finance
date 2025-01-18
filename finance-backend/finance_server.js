@@ -328,6 +328,29 @@ app.post('/depositMoney', async (req, res) => {
     }
 })
 
+app.post('/withdrawMoney', async (req, res) => {
+    
+    const {total_amount, pots_id} = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Run a SQL query to get data from the Users table
+        const depositResult = await pool
+            .request()
+            .input('total_amount', sql.Real, total_amount)
+            .input('pots_id', sql.Int, pots_id)
+            .query('UPDATE dbo.Pots SET total_amount = @total_amount WHERE pots_id = @pots_id');
+        
+        return res.status(200).json({ message: 'Withdraw successful', depositResult });
+          
+    } catch (err) {
+        console.error('SQL error', err);
+        res.status(500).send('Serv');
+    }
+})
+
 
 
 

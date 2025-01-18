@@ -29,41 +29,41 @@ interface Pots {
 }
 
 
-interface DepositModalProps {
+interface WithdrawModalProps {
     open: boolean; 
     onClose: () => void;
     thePot?: Pots | null;
 }
 
 
-export default function depositModal(props: DepositModalProps) {
+export default function withdrawModal(props: WithdrawModalProps) {
 
     const {fetchPotsUpdate} = usePots();
 
-    const [depositAmount, setDepositAmount] = React.useState<number>(0)
-    const [depositAmountError, setDepositAmountError] = React.useState<string>('')
+    const [withdrawAmount, setWithdrawAmount] = React.useState<number>(0)
+    const [withdrawAmountError, setWithdrawAmountError] = React.useState<string>('')
 
-    const handleDepost = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-        setDepositAmount(Number(e.target.value))
-    }, [depositAmount])
+    const handleWithdraw = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+        setWithdrawAmount(Number(e.target.value))
+    }, [withdrawAmount])
 
     const depositMoney = async () => {
         try{
 
-            if(depositAmount <= 0) {
-                setDepositAmountError('Negative numbers are not allowed')
+            if(withdrawAmount <= 0) {
+                setWithdrawAmountError('Negative numbers are not allowed')
                 return;
             }
 
-            const res = await fetch('http://localhost:5000/withdrawMoney', {
+            const res = await fetch('http://localhost:5000/depositMoney', {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ total_amount: depositAmount + Number(props.thePot?.total_amount), pots_id: props.thePot?.pots_id })
+                body: JSON.stringify({ total_amount: Number(props.thePot?.total_amount) - withdrawAmount , pots_id: props.thePot?.pots_id })
             });
 
             if(res.ok) {
                 await fetchPotsUpdate();
-                setDepositAmountError('')
+                setWithdrawAmountError('')
                 props.onClose()
             }
         } catch (error) {
@@ -81,11 +81,11 @@ export default function depositModal(props: DepositModalProps) {
                 </Box>
                 
                 <Box>
-                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}>Would you like to deposit to {props.thePot?.category_name} account?</Typography>
+                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}>Would you like to withdraw from {props.thePot?.category_name} account?</Typography>
                 </Box>
                 
                 <Box sx={{display: 'flex', justifyContent: 'space-between', mt: '30px'}}>
-                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}>New Amount</Typography>
+                    <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: "#696868", display: 'inline-block', pt: '15px'}}>Withdraw Amount</Typography>
                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '32px', color: '#201F24', display: 'inline-block'}}><b>${parseFloat(Number(props.thePot?.total_amount).toFixed(2))}</b></Typography>
                 </Box>
                 <Box sx={{textAlign: 'center'}}>
@@ -108,17 +108,17 @@ export default function depositModal(props: DepositModalProps) {
                             }
                         }} 
                         sx={{width: '100%', fontFamily: 'Nunito', mt: '30px'}} 
-                        label="Amount to Deposit" 
+                        label="Amount to Withdraw" 
                         id="potName"
                         margin="normal"
                         size={'medium'}
                         type="number"
-                        onChange={handleDepost}
+                        onChange={handleWithdraw}
                 />
-                <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red'}}>{depositAmountError}</Typography>
+                <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red'}}>{withdrawAmountError}</Typography>
 
                 <Button onClick={depositMoney} sx={{background: 'black', color: 'white', height: '53px', mt: '20px', fontFamily: public_sans.style.fontFamily, textTransform: 'capitalize'}}>
-                    <b>Confirm Deposit</b>
+                    <b>Confirm Withdrawal</b>
                 </Button>
             </Box>
         </Box>
