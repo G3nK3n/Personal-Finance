@@ -12,6 +12,7 @@ import { usePots } from "../components/Context/potsContext";
 import AddPotsModal from '../components/Modals/addPotsModal'
 import DepositModal from "../components/Modals/depositModal";
 import WithdrawModal from "../components/Modals/withdrawModal";
+import DropDownEllipsis from "../components/Modals/ellipsisDropdownModal";
 
 const public_sans = Public_Sans({
     subsets: ['latin'],
@@ -30,13 +31,26 @@ interface Pots {
     color_name: string
 }
 
-export default function BillsLayout() {
+export default function PotsLayout() {
 
     const {getPots} = usePots()
     const [showAddPotsModal, setShowAddPotsModal] = React.useState<boolean>(false);
     const [showDepositModal, setShowDepositModal] = React.useState<boolean>(false);
     const [showWithdrawModal, setShowWithdrawModal] = React.useState<boolean>(false);
     const [selectedPots, setSelectedPots] = React.useState<Pots|null>(null)
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+    // Open the menu
+    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, pot: Pots) => {
+        setSelectedPots(pot);
+        setAnchorEl(event.currentTarget);
+    };
+
+    // Close the menu
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
 
     const toggleAddPotsModal = () => {
         setShowAddPotsModal(!showAddPotsModal)
@@ -77,8 +91,8 @@ export default function BillsLayout() {
                                             <Box sx={{display: 'inline-block', backgroundColor: pots.color, borderRadius: '50%', width: '15px', height: '15px', marginRight: '20px'}} />
                                             <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '20px', color: '#201F24', display: 'inline-block'}}><b>{pots.category_name}</b></Typography>
                                         </Box>
-                                        <Box sx={{mt:'7px'}}>
-                                            <Image alt='logo' src={'/images/icon-ellipsis.svg'} width={16} height={16}/>
+                                        <Box sx={{mt:'7px', cursor: 'pointer'}}>
+                                            <Image alt='logo' src={'/images/icon-ellipsis.svg'} width={16} height={16} onClick={(event) => handleOpenMenu(event, pots)}/>
                                         </Box>
                                     </Box>
                                     <Box sx={{display: 'flex', justifyContent: 'space-between', padding: '0px 100px', mt: '30px'}}>
@@ -111,6 +125,16 @@ export default function BillsLayout() {
                     
                 </Grid2>
             </Container>
+
+            {/* Dropdown Menu */}
+            {selectedPots && (
+                <DropDownEllipsis
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleCloseMenu}
+                    pot={selectedPots}
+                />
+            )}
         </Box>
     )
 }
