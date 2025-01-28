@@ -351,6 +351,33 @@ app.post('/withdrawMoney', async (req, res) => {
     }
 })
 
+app.delete('/deletePots', async (req, res) => {
+    
+    const { pots_id, category_id } = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Run a SQL query to get data from the Users table
+        await pool
+            .request()
+            .input('pots_id', sql.Int, pots_id)
+            .query('DELETE from dbo.Pots WHERE pots_id = @pots_id');
+
+            await pool
+                .request()
+                .input('category_id', sql.Int, category_id)
+                .query('DELETE from dbo.Category WHERE category_id = @category_id');
+        
+        return res.status(200).json({ message: 'Delete Successful!' });
+          
+    } catch (err) {
+        console.error('SQL error', err);
+        res.status(500).send('Serv');
+    }
+})
+
 
 
 
