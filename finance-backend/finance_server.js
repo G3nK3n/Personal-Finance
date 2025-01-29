@@ -305,6 +305,88 @@ app.post('/AddNewPot', async (req, res) => {
     }
 });
 
+app.patch('/EditPot', async (req, res) => {
+    const { pots_id, category_id, category_name, target, color_name } = req.body;
+    
+    try {
+        // Connect to the database
+        const pool = await sql.connect(config);
+
+        // Begin transaction
+        const transaction = new sql.Transaction(pool);
+        await transaction.begin();
+
+        // Check if the category exists
+        const categoryResult = await transaction
+            .request()
+            .input('category_name', sql.VarChar, category_name)
+            .query('SELECT COUNT(*) AS count FROM dbo.Category WHERE category_name = @category_name');
+
+        if (categoryResult.recordset[0].count > 0 || (category_name === null || category_name === '')) {
+            await transaction.rollback();
+            return res.status(409).json({ message: 'Category name already exists or is empty. Please enter a new category name.' });
+        }
+
+        // Validate color_name
+        if (!color_name) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Please select a color' });
+        }
+
+        // Validate target
+        if (target < 1) {
+            await transaction.rollback();
+            return res.status(411).json({ message: 'Please enter a target bigger than 1' });
+        }
+
+        // Get color_id
+        const colorResult = await transaction 
+            .request()
+            .input('color_name', sql.VarChar, color_name)
+            .query('SELECT color_id FROM dbo.Colors WHERE color_name = @color_name');
+
+        if (colorResult.recordset.length === 0) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Invalid color name' });
+        }
+
+        const colorId = colorResult.recordset[0].color_id;
+
+        // Insert new category
+        await transaction
+            .request()
+            .input('category_name', sql.VarChar, category_name)
+            .input('category_id', sql.Int, category_id)
+            .query('UPDATE dbo.Category SET category_name = @category_name WHERE category_id = @category_id');
+
+        // Insert new pot
+        await transaction
+            .request()
+            .input('pots_id', sql.Int, pots_id)
+            .input('target', sql.Int, target)
+            .input('color_id', sql.Int, colorId)
+            .query('UPDATE dbo.Pots SET target = @target, color_id = @color_id WHERE pots_id = @pots_id');
+
+        // Commit transaction
+        await transaction.commit();
+
+        res.status(201).json({ message: 'Pot edited successfully!' });
+    } catch (error) {
+        console.error('Database error:', error);
+
+        if (transaction) {
+            try {
+                await transaction.rollback();
+            } catch (rollbackError) {
+                console.error('Rollback error:', rollbackError);
+            }
+        }
+
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
 app.post('/depositMoney', async (req, res) => {
     
     const {total_amount, pots_id} = req.body;

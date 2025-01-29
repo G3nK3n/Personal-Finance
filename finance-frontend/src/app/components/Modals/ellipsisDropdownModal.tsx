@@ -2,6 +2,7 @@ import { Box, Menu, MenuItem } from "@mui/material";
 import React, { useState } from "react";
 
 import ConfirmDelete from "./confirmDelete";
+import EditsPotsModal from "./editPotsModal";
 
 interface Pots {
     pots_id: number;
@@ -24,10 +25,11 @@ interface DropDownEllipsisProps {
 const DropDownEllipsis: React.FC<DropDownEllipsisProps> = ({ anchorEl, open, onClose, pot }) => {
 
     const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false)
+    const [showEditPot, setShowEditPot] = useState<boolean>(false)
 
     const handleEdit = () => {
         if (pot) {
-            console.log("Edit Pot:", pot); // Add your edit logic here
+            setShowEditPot(!showEditPot)
         }
         onClose();
     };
@@ -61,6 +63,12 @@ const DropDownEllipsis: React.FC<DropDownEllipsisProps> = ({ anchorEl, open, onC
             {showConfirmDelete && (
                 <ConfirmDelete setConfirm={setShowConfirmDelete} thePot={pot}/>
             )}
+
+            {showEditPot && (
+                <EditsPotsModal setEditPot={setShowEditPot} thePot={pot}/>
+            )}
+
+
         </Box>
     );
 };
