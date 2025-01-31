@@ -71,12 +71,19 @@ export default function depositModal(props: DepositModalProps) {
         }
     }
 
+    //This sets the amount to 0 when closing the modal
+    const handleClose = () => {
+        setDepositAmount(0)
+        props.onClose();
+    };
+
+    //Added key={props.open ? "open" : "closed"} because  the component is effectively being re-rendered as a "new" component each time. This resets the state because React will discard the old component's state on re-mount.
     return(
-        <Box sx={{display: props.open ? 'block' : 'none', position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', background: '#0000001c', zIndex: '1'}}>
+        <Box key={props.open ? "open" : "closed"} sx={{display: props.open ? 'block' : 'none', position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', background: '#0000001c', zIndex: '1'}}>
             <Box sx={{padding: '35px', position: 'fixed', background: 'white', width: '560px', height: '457px', top: '49%', left: '55%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', borderRadius: '20px', zIndex: '1' }}>
                 <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                     <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '34px', color: "#201F24", display: 'inline-block'}}><b>Deposit to '{props.thePot?.category_name}'</b></Typography>
-                    <Image onClick={() => props.onClose()} style={{marginTop: '12px', cursor: 'pointer'}} alt='logo' src={'/images/icon-close-modal.svg'} width={30} height={30}/> 
+                    <Image onClick={handleClose} style={{marginTop: '12px', cursor: 'pointer'}} alt='logo' src={'/images/icon-close-modal.svg'} width={30} height={30}/> 
                     {/* Use () => props.onClose() to make sure the close works, since it will return null after closing  */}
                 </Box>
                 
@@ -113,6 +120,7 @@ export default function depositModal(props: DepositModalProps) {
                         margin="normal"
                         size={'medium'}
                         type="number"
+                        defaultValue={depositAmount}
                         onChange={handleDepost}
                 />
                 <Typography sx={{fontFamily: public_sans.style.fontFamily, fontSize: '12px', color: 'red'}}>{depositAmountError}</Typography>

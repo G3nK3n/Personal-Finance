@@ -214,5 +214,3 @@ const EditsPotsModal: React.FC<editProps> = ({setEditPot, thePot}) =>  {
 }
 
 export default EditsPotsModal;
-
-//FIX LOGIC FOR SAVING CHANGES AND TEST WHEN NOT CHANGING COLOR 
